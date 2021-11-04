@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -12,6 +13,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -19,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.android.material.button.MaterialButton
 import com.thk.mybasicscodelab.ui.theme.MyBasicsCodelabTheme
 
 class MainActivity : ComponentActivity() {
@@ -91,8 +94,19 @@ private fun Greetings(names: List<String> = List(1000) { "$it" } ) {
     LazyColumn(modifier = Modifier.padding(vertical = 4.dp)) {
         // LazyColumn 에서 제공하는 items 요소. 쓰여진 코드대로 각각의 항목을 렌더링
         items(items = names) { name ->
-            Greeting(name = name)
+            CardFrame(name = name)
+//            Greeting(name = name)
         }
+    }
+}
+
+@Composable
+private fun CardFrame(name: String) {
+    Card(
+        backgroundColor = MaterialTheme.colors.primary,
+        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Greeting(name = name)
     }
 }
 
@@ -101,39 +115,55 @@ fun Greeting(name: String) {
     // 그냥 Boolean 아니라 MutableStateOf<Boolean> 인거라서 .value 로 값 접근해야 함
     // 리컴포지션이 발생하면 변수들의 상태도 초기화되기때문에 상태를 유지하기 위해 remember 가 필요함
     // LazyColumn으로 인해 다시 그려지면서 상태가 초기화되는 것을 막으려면 rememberSaveable 사용할
-    val expended = remember { mutableStateOf(false) }
+    var expended by remember { mutableStateOf(false) }
     
     // remember 할 필요 없음 <- expended 상태에 맞춰서 바뀌니까
     // 넘겨준 targetValue 까지 dp 값을 변화시켜주는(애니매이션) 함수
     // animate*AsState 류의 함수들은 다른 요소에 의해서 중간에 중단 가능함
     val extraPadding by animateDpAsState(
-        if (expended.value) 48.dp else 0.dp,
+        if (expended) 48.dp else 0.dp,
         animationSpec = spring(     // 해당 인자에 애니메이션을 넘겨서 적용시킴
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
         ))
 
-    Surface(
-        color = MaterialTheme.colors.primary,
-        modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)
-    ) {
-        Row(modifier = Modifier.padding(24.dp)) {
-            Column(modifier = Modifier
-                .weight(1f)
-                .padding(bottom = extraPadding.coerceAtLeast(0.dp))) {
-                Text(text = "Hello,")
-                Text(text = name, style = MaterialTheme.typography.h4.copy(     // 제공되는 MaterialTheme 으로 스타일 지정 가능
-                    fontWeight = FontWeight.ExtraBold       // 이미 정의된 스타일을 copy()로 수정 가능함
-                ))
-            }
 
-            OutlinedButton(
-                onClick = { expended.value = !expended.value }
-            ) {
-                Text(text = if (expended.value) "Show less" else "Show more")
+    Row(
+        modifier = Modifier
+            .padding(12.dp)
+            .animateContentSize(animationSpec = spring(     // 해당 인자에 애니메이션을 넘겨서 적용시킴
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow)
+            )
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(12.dp)     // margin 으로 적용됨. Row의 스프링 애니메이션으로 인해 Row의 패딩(마진)이 Column 영역을 침범하지 못하도록 함
+        ) {
+            Text(text = "Hello,")
+            Text(text = name, style = MaterialTheme.typography.h4.copy(     // 제공되는 MaterialTheme 으로 스타일 지정 가능
+                fontWeight = FontWeight.ExtraBold       // 이미 정의된 스타일을 copy()로 수정 가능함
+            ))
+            if (expended) {
+                Text(
+                    text = ("Composem ipsum color sit lazy, padding theme elit, sed do bouncy. ").repeat(4)
+                )
             }
         }
+
+        IconButton(
+            onClick = { expended = !expended }
+        ) {
+            Icon(
+                imageVector = if (expended) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                contentDescription = (if (expended) R.string.show_less else R.string.show_more).toString()
+            )
+
+//                Text(text = if (expended.value) "Show less" else "Show more")
+        }
     }
+
 }
 
 @Preview(   // 다크모드 프리뷰 추가
