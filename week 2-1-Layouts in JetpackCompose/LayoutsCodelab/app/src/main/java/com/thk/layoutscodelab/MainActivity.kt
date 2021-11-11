@@ -3,33 +3,91 @@ package com.thk.layoutscodelab
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Anchor
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
 import com.thk.layoutscodelab.ui.theme.LayoutsCodelabTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             LayoutsCodelabTheme {
-                LayoutsCodelab()
+                ImageList()
             }
         }
+    }
+}
+
+@Composable
+fun ImageList() {
+    val listSize = 100
+
+    // 스크롤 포지션을 state로 저장하기 위해, 프로그래밍적으로 리스트를 스크롤 할수있게
+//    val scrollState = rememberScrollState()   // 일반 column 에서 쓰는 스크롤 state
+    val scrollState = rememberLazyListState()   // lazy column 에서 쓰는 state
+
+    // 생성된 coroutineScope 는 호출된 곳의 lifecycle을 따름
+    val coroutineScope = rememberCoroutineScope()   // 자동 스크롤이 실행되는 곳에 coroutine scope 저장
+
+    Column {
+        Row {
+            Button(onClick = { coroutineScope.launch {
+                scrollState.animateScrollToItem(0)  // 리스트의 첫번째 아이템으로 이동
+            } }) {
+                Text(text = "Scroll to the top")
+            }
+
+            Button(onClick = { coroutineScope.launch {
+                scrollState.animateScrollToItem(listSize - 1) // 리스트의 마지막 아이템으로 이동
+            } }) {
+                Text(text = "Scroll to the end")
+            }
+        }
+
+        LazyColumn(state = scrollState) {
+            items(100) {
+                ImageListItem(index = it)
+            }
+        }
+    }
+
+}
+
+@Preview
+@Composable
+fun ImageListPreview() {
+    LayoutsCodelabTheme {
+        ImageList()
+    }
+}
+
+@Composable
+fun ImageListItem(index: Int) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Image(
+            painter = rememberImagePainter(data = "https://developer.android.com/images/brand/Android_Robot.png"),  // Coil 사용해서 이미지 로딩
+            contentDescription = "Android Logo",
+            modifier = Modifier.size(50.dp)
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Text(text = "Item #$index", style = MaterialTheme.typography.subtitle1)
     }
 }
 
