@@ -3,11 +3,14 @@ package com.thk.layoutscodelab
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Anchor
@@ -17,6 +20,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.layout.Layout
@@ -37,6 +41,86 @@ class MainActivity : ComponentActivity() {
             LayoutsCodelabTheme {
                 ImageList()
             }
+        }
+    }
+}
+
+val topics = listOf(
+    "Arts & Crafts", "Beauty", "Books", "Business", "Comics", "Culinary",
+    "Design", "Fashion", "Film", "History", "Maths", "Music", "People", "Philosophy",
+    "Religion", "Social sciences", "Technology", "TV", "Writing"
+)
+
+@Composable
+fun Chip(modifier: Modifier = Modifier, text: String) {
+    Card(
+        modifier = modifier,
+        border = BorderStroke(color = Color.Black, width = Dp.Hairline),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Row(
+            modifier = modifier.padding(start = 8.dp, top = 4.dp, end = 8.dp, bottom = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier
+                .size(16.dp, 16.dp)
+                .background(color = MaterialTheme.colors.secondary))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(text = text)
+        }
+    }
+}
+
+@Preview
+@Composable
+fun ChipPreview() {
+    LayoutsCodelabTheme {
+        Chip(text = "Hi there")
+    }
+}
+
+@Composable
+fun StaggeredGrid(modifier: Modifier = Modifier, rows: Int = 3, content: @Composable () -> Unit) {
+    Layout(modifier = modifier, content = content) { measurables, constraints ->
+        val rowWidths = IntArray(rows) { 0 }        // 각 행의 width
+        val rowHeights = IntArray(rows) { 0 }       // 각 행의 최대 height
+
+        val placeables = measurables.mapIndexed { index, measurable ->
+
+            // 각 children 측정 진행함
+            val placeable = measurable.measure(constraints = constraints)
+
+            val row = index % rows
+            rowWidths[row] += placeable.width
+            rowHeights[row] = Math.max(rowHeights[row], placeable.height)
+
+            placeable   // return
+        }
+
+        // 각 행 중 가장 넓은 width가 grid의 전체 width가 됨
+        val gridWidth = rowWidths.maxOrNull()?.coerceIn(constraints.minWidth.rangeTo(constraints.maxWidth)) ?: constraints.minWidth
+        // 각 행의 가장 큰 childern의 height의 합이 전체 grid의 height
+        val gridHeight = rowHeights.sumOf { it }.coerceIn(constraints.minHeight.rangeTo(constraints.maxHeight))
+
+        // 이전 행의 y값과 높이를 더해서 다음 행의 y position 계산
+        val rowY = IntArray(rows) { 0 }
+        for (i in 1 until rows) {
+            rowY[i] = rowY[i-1] + rowHeights[i-1]
+        }
+
+
+
+        layout(gridWidth, gridHeight) {
+            val rowX = IntArray(rows) { 0 }
+
+            placeables.forEachIndexed { index, placeable ->
+                val row = index % rows
+
+                placeable.placeRelative(x = rowX[row], y = rowY[row])
+
+                rowX[row] += placeable.width    // 다음 아이템이 놓여야 할 x position으로 계속 갱신되다가, 마지막에는 row의 전체 width가 됨
+            }
+
         }
     }
 }
@@ -203,12 +287,18 @@ fun LayoutsCodelab() {
 
 @Composable
 fun BodyContent(modifier: Modifier = Modifier) {
-    MyOwnColumn(modifier.padding(8.dp)) {
-        Text(text = "MyOwnColumn")
-        Text(text = "아이템을")
-        Text(text = "수직으로 표시한다")
-        Text(text = "내가 직접 만듬~~~")
+    StaggeredGrid(modifier, rows = 5) {
+        for (topic in topics) {
+            Chip(modifier = modifier.padding(8.dp), text = topic)
+        }
     }
+
+//    MyOwnColumn(modifier.padding(8.dp)) {
+//        Text(text = "MyOwnColumn")
+//        Text(text = "아이템을")
+//        Text(text = "수직으로 표시한다")
+//        Text(text = "내가 직접 만듬~~~")
+//    }
 
 //    Column(modifier = modifier) {
 //        Text(text = "Hi there!")
@@ -220,7 +310,7 @@ fun BodyContent(modifier: Modifier = Modifier) {
 @Composable
 fun LayoutsCodelabPreview() {
     LayoutsCodelabTheme {
-        LayoutsCodelab()
+        BodyContent()
     }
 }
 
