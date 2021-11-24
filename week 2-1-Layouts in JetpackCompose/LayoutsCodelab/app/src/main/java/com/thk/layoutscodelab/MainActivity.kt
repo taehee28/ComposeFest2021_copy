@@ -19,15 +19,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.AlignmentLine
-import androidx.compose.ui.layout.FirstBaseline
-import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.MeasurePolicy
-import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.ConstraintSet
+import androidx.constraintlayout.compose.Dimension
+import androidx.constraintlayout.compose.atLeast
 import coil.compose.rememberImagePainter
 import com.thk.layoutscodelab.ui.theme.LayoutsCodelabTheme
 import kotlinx.coroutines.launch
@@ -40,6 +40,102 @@ class MainActivity : ComponentActivity() {
                 ImageList()
             }
         }
+    }
+}
+
+@Composable
+fun DecoupledConstrainLayout() {
+    BoxWithConstraints {
+        // 제약조건 분리하는 이유 : 1. changing the constraints based on the screen configuration 2. animating between 2 constraint sets
+
+        // portrait or landscape 판별
+        val constraints = if (maxWidth < maxHeight) decoupledConstraints(margin = 16.dp) else decoupledConstraints(margin = 32.dp)
+
+        // ConstraintSet을 Layout에 넘겨 내부에서 id로 레퍼런스들을 참조할 수 있게 함
+        // 각 컴포저블에 작성하던 제약조건을 명시하는 body lambda를 바깥으로 분리했음
+        ConstraintLayout(constraintSet = constraints) {
+            Button(onClick = { /*TODO*/ }, modifier = Modifier.layoutId("button")) {
+                Text(text = "button")
+            }
+            
+            Text(text = "Text", modifier = Modifier.layoutId("text"))
+        }
+    }
+}
+
+private fun decoupledConstraints(margin: Dp): ConstraintSet {
+    return ConstraintSet {
+        val button = createRefFor("button")
+        val text = createRefFor("text")
+
+        // 분리된 제약조건 명시 body lambda
+        constrain(button) { top.linkTo(parent.top, margin = margin) }
+        constrain(text) { top.linkTo(button.bottom, margin = margin) }
+    }
+}
+
+@Composable
+fun LargeConstrainLayout() {
+    ConstraintLayout {
+        val text = createRef()
+        val guideline = createGuidelineFromStart(fraction = 0.5f)
+
+        Text(
+            text = "This is very very very very very very very very very very very long text",
+            modifier = Modifier.constrainAs(text) {
+                linkTo(start = guideline, end = parent.end)     // 그냥 linkTo 로 start, end, top, bottom 한번에 지정 가능
+                width = Dimension.preferredWrapContent.atLeast(100.dp)  // dimension에 맞게 내용 크기만큼 크기를 가지고 최소 width는 100dp
+            }
+        )
+    }
+}
+
+@Preview
+@Composable
+fun LargeConstrainLayoutPreview() {
+    LayoutsCodelabTheme {
+        LargeConstrainLayout()
+    }
+}
+
+@Composable
+fun ConstraintLayoutContent() {
+    ConstraintLayout {
+        // 레퍼런스(참조) 생성
+        val (button1, button2, text) = createRefs()
+
+        Button(
+            onClick = { /*TODO*/ },
+            // Button 컴포저블에 button 레퍼런스 할당, body lambda에 제약조건(constraint) 적어줌
+            modifier = Modifier.constrainAs(button1) { top.linkTo(parent.top, margin = 16.dp) }
+        ) {
+            Text(text = "button1")
+        }
+
+        Text(text = "Text", Modifier.constrainAs(text) {
+            top.linkTo(button1.bottom, margin = 16.dp)
+            centerHorizontallyTo(parent)
+        })
+
+        val barrier = createEndBarrier(button1, text)   // helpers can be created in the ConstraintLayout, not inside constrainAs
+
+        Button(
+            onClick = { /*TODO*/ },
+            modifier = Modifier.constrainAs(button2) {
+                top.linkTo(parent.top, margin = 16.dp)
+                start.linkTo(barrier)
+            }
+        ) {
+            Text(text = "button2")
+        }
+    }
+}
+
+@Preview
+@Composable
+fun ConstraintLayoutContentPreview() {
+    LayoutsCodelabTheme {
+        ConstraintLayoutContent()
     }
 }
 
