@@ -44,6 +44,46 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
+fun TwoTexts(modifier: Modifier = Modifier, text1: String, text2: String) {
+    // 실제로 measuring 하기 전에 재귀적으로 Row와 그 안의 자식들의 최소 내부 높이를 쿼리함
+    // Row의 minIntrinsicHeight는 자식 요소들의 최대 minIntrinsicHeight가 됨(divider의 height는 늘어나기 전까지 0dp)
+    Row(modifier = modifier.height(IntrinsicSize.Min)) {
+        Text(
+            text = text1,
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 4.dp)
+                .wrapContentWidth(Alignment.Start)
+        )
+
+        Divider(
+            color = Color.Black,
+            modifier = Modifier
+                .fillMaxHeight()    // Row가 주는 height 제약조건에 따라서 높이가 늘어난다.
+                .width(1.dp)
+        )
+
+        Text(
+            text = text2,
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 4.dp)
+                .wrapContentWidth(Alignment.End)
+        )
+    }
+}
+
+@Preview
+@Composable
+fun TwoTextsPreview() {
+    LayoutsCodelabTheme {
+        Surface {
+            TwoTexts(text1 = "Hi", text2 = "There")
+        }
+    }
+}
+
+@Composable
 fun DecoupledConstrainLayout() {
     BoxWithConstraints {
         // 제약조건 분리하는 이유 : 1. changing the constraints based on the screen configuration 2. animating between 2 constraint sets
