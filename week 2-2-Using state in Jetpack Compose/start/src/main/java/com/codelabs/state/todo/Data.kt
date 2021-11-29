@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * TodoItem 을 나타내기 위해 사용되는 데이터 구조
+ */
+
 package com.codelabs.state.todo
 
 import androidx.annotation.StringRes

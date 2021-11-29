@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * 화면을 만들기 위해 사용하는 재사용 가능한 컴포저블들
+ */
+
 package com.codelabs.state.todo
 
 import androidx.annotation.StringRes
