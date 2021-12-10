@@ -17,12 +17,7 @@
 package com.codelabs.state.todo
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
@@ -129,11 +124,20 @@ fun TodoInputTextField(text: String, onTextChange: (String) -> Unit, modifier: M
 }
 
 /**
- * @param onItemComplete [TodoScreen]의 onAddItem 람다가 넘어옴 
+ * @param onItemComplete [TodoScreen]의 onAddItem 람다가 넘어옴
  */
 @Composable
 fun TodoItemInput(onItemComplete: (TodoItem) -> Unit) {
     val (text, setText) = remember { mutableStateOf("") }   // hoisted
+
+    val (icon, setIcon) = remember { mutableStateOf(TodoIcon.Default) }     // holds the currently selected icon
+    val iconsVisible = text.isNotBlank()
+
+    val submit = {      // () -> Unit 이라서 파라미터 괄호도 생략
+        onItemComplete(TodoItem(text))      // sharing hoisted state
+        setIcon(TodoIcon.Default)       // add 하고 나서 선택된 아이콘 초기화
+        setText("")     // sharing hoisted state
+    }
 
     Column {
         Row(
@@ -146,19 +150,27 @@ fun TodoItemInput(onItemComplete: (TodoItem) -> Unit) {
                 onTextChange = setText,     // sharing hoisted state
                 modifier = Modifier
                     .weight(1f)
-                    .padding(end = 8.dp)
+                    .padding(end = 8.dp),
+                onImeAction = submit    // 키보드 자판 액션
             )
 
             TodoEditButton(
-                onClick = {
-                    onItemComplete(TodoItem(text))      // sharing hoisted state
-                    setText("")     // sharing hoisted state
-                },
+                onClick = submit,
                 text = "Add",
                 modifier = Modifier.align(Alignment.CenterVertically),
                 enabled = text.isNotBlank()
             )
 
+        }
+
+        if (iconsVisible) {
+            AnimatedIconRow(
+                icon = icon,
+                onIconChange = setIcon,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        } else {
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
