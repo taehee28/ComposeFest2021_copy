@@ -50,7 +50,7 @@ fun TodoScreen(
 ) {
     Column {
         TodoItemInputBackground(elevate = true, modifier = Modifier.fillMaxWidth()) {
-            TodoItemInput(onItemComplete = onAddItem)
+            TodoItemEntryInput(onItemComplete = onAddItem)
         }
         
         LazyColumn(
@@ -124,10 +124,11 @@ fun TodoInputTextField(text: String, onTextChange: (String) -> Unit, modifier: M
 }
 
 /**
+ * TodoItem 추가를 위해서만 쓰이는 [TodoItemInput]
  * @param onItemComplete [TodoScreen]의 onAddItem 람다가 넘어옴
  */
 @Composable
-fun TodoItemInput(onItemComplete: (TodoItem) -> Unit) {
+fun TodoItemEntryInput(onItemComplete: (TodoItem) -> Unit) {
     val (text, setText) = remember { mutableStateOf("") }   // hoisted
 
     val (icon, setIcon) = remember { mutableStateOf(TodoIcon.Default) }     // holds the currently selected icon
@@ -139,15 +140,38 @@ fun TodoItemInput(onItemComplete: (TodoItem) -> Unit) {
         setText("")     // sharing hoisted state
     }
 
+    TodoItemInput(
+        text = text,
+        onTextChange = setText,
+        icon = icon,
+        setIcon = setIcon,
+        submit = submit,
+        iconsVisible = iconsVisible
+    )
+}
+
+/**
+ * 분리된 stateless한 컴포저블
+ */
+@Composable
+fun TodoItemInput(
+    text: String,
+    onTextChange: (String) -> Unit,
+    icon: TodoIcon,
+    setIcon: (TodoIcon) -> Unit,
+    submit: () -> Unit,
+    iconsVisible: Boolean
+) {
     Column {
         Row(
             Modifier
                 .padding(horizontal = 16.dp)
-                .padding(top = 16.dp)) {
+                .padding(top = 16.dp)
+        ) {
 
             TodoInputText(
                 text = text,    // sharing hoisted state
-                onTextChange = setText,     // sharing hoisted state
+                onTextChange = onTextChange,     // sharing hoisted state
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 8.dp),
@@ -196,4 +220,4 @@ fun PreviewTodoRow() {
 
 @Preview
 @Composable
-fun PreviewTodoItemInput() = TodoItemInput(onItemComplete = { })
+fun PreviewTodoItemInput() = TodoItemEntryInput(onItemComplete = { })
