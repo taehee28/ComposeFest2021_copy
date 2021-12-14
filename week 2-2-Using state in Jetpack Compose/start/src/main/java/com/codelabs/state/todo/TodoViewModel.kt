@@ -16,22 +16,57 @@
 
 package com.codelabs.state.todo
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class TodoViewModel : ViewModel() {
 
-    private var _todoItems = MutableLiveData(listOf<TodoItem>())
-    val todoItems: LiveData<List<TodoItem>> = _todoItems
+//    private var _todoItems = MutableLiveData(listOf<TodoItem>())
+//    val todoItems: LiveData<List<TodoItem>> = _todoItems
+
+    // state: todoItems
+    var todoItems = mutableStateListOf<TodoItem>()
+        private set
+
+    // private state
+    private var currentEditPosition by mutableStateOf(-1)
+
+    // state
+    val currentEditItem: TodoItem?
+        get() = todoItems.getOrNull(currentEditPosition)
 
     fun addItem(item: TodoItem) {
-        _todoItems.value = _todoItems.value!! + listOf(item)
+        todoItems.add(item)
     }
 
     fun removeItem(item: TodoItem) {
-        _todoItems.value = _todoItems.value!!.toMutableList().also {
-            it.remove(item)
+        todoItems.remove(item)
+        onEditDone()    // 항목이 삭제되면 에디터 텍스트필드 닫기
+    }
+
+    // event
+    fun onEditItemSelected(item: TodoItem) {
+        currentEditPosition = todoItems.indexOf(item)
+    }
+
+    // event
+    fun onEditDone() {
+        currentEditPosition = -1
+    }
+
+    // event
+    fun onEditItemChange(editedItem: TodoItem) {
+        val currentItem = requireNotNull(currentEditItem)
+        require(currentItem.id == editedItem.id) {
+            // lazy message
+            "You can only change an item with the same id as currentEditItem"
         }
+
+        todoItems[currentEditPosition] = editedItem
     }
 }
