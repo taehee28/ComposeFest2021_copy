@@ -50,8 +50,12 @@ private fun TodoActivityScreen(todoViewModel: TodoViewModel) {
     // ViewModel이 State를 사용함에 따라 코드 업데이트
     TodoScreen(
         items = todoViewModel.todoItems,
+        currentlyEditing = todoViewModel.currentEditItem,
         onAddItem = todoViewModel::addItem,
-        onRemoveItem = todoViewModel::removeItem
+        onRemoveItem = todoViewModel::removeItem,
+        onStartEdit = todoViewModel::onEditItemSelected,
+        onEditItemChange = todoViewModel::onEditItemChange,
+        onEditDone = todoViewModel::onEditDone
     )
 
 
