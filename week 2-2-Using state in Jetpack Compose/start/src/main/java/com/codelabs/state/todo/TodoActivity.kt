@@ -47,15 +47,24 @@ class TodoActivity : AppCompatActivity() {
  */
 @Composable
 private fun TodoActivityScreen(todoViewModel: TodoViewModel) {
-    // LiveData를 observe하고 현재 데이터를 List<TodoItem>의 형태로 바로 사용할 수 있도록 함
-    val items: List<TodoItem> by todoViewModel.todoItems.observeAsState(initial = listOf())
-
-    // TodoScreen 컴포저블이 바로 ViewModel을 받게 할 수 있지만,
-    // 더 단순한 파라미터를 사용함으로써(List 형태 등) state가 hoist된 특정 장소에 종속되지 않도록함
+    // ViewModel이 State를 사용함에 따라 코드 업데이트
     TodoScreen(
-        items = items,
-        // TodoScreen이 해당 이벤트를 호출하면 ViewModel의 이벤트로 호출을 패스할 수 있게
-        onAddItem = { todoViewModel.addItem(it) },
-        onRemoveItem = { todoViewModel.removeItem(it) }
+        items = todoViewModel.todoItems,
+        onAddItem = todoViewModel::addItem,
+        onRemoveItem = todoViewModel::removeItem
     )
+
+
+
+//    // LiveData를 observe하고 현재 데이터를 List<TodoItem>의 형태로 바로 사용할 수 있도록 함
+//    val items: List<TodoItem> by todoViewModel.todoItems.
+//
+//    // TodoScreen 컴포저블이 바로 ViewModel을 받게 할 수 있지만,
+//    // 더 단순한 파라미터를 사용함으로써(List 형태 등) state가 hoist된 특정 장소에 종속되지 않도록함
+//    TodoScreen(
+//        items = items,
+//        // TodoScreen이 해당 이벤트를 호출하면 ViewModel의 이벤트로 호출을 패스할 수 있게
+//        onAddItem = { todoViewModel.addItem(it) },
+//        onRemoveItem = { todoViewModel.removeItem(it) }
+//    )
 }
