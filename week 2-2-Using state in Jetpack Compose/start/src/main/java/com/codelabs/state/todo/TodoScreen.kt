@@ -75,7 +75,7 @@ fun TodoScreen(
             contentPadding = PaddingValues(top = 8.dp)
         ) {
             items(items = items) { todo ->
-                // 수정 중인 항목이 있을 때 해당 항목은 인라인 에디터를 표시하는 작업 
+                // 수정 중인 항목이 있을 때 해당 항목은 인라인 에디터를 표시하는 작업
                 if (currentlyEditing?.id == todo.id) {      // 수정 중인 항목
                     TodoItemInlineEditor(
                         item = currentlyEditing,
@@ -175,7 +175,10 @@ fun TodoItemEntryInput(onItemComplete: (TodoItem) -> Unit) {
         onIconChange = setIcon,
         submit = submit,
         iconsVisible = iconsVisible
-    )
+    ) {
+        // 버튼 슬롯 구현
+        TodoEditButton(onClick = submit, text = "Add", enabled = text.isNotBlank())
+    }
 }
 
 @Composable
@@ -183,14 +186,33 @@ fun TodoItemInlineEditor(
     item: TodoItem,
     onEditItemChange: (TodoItem) -> Unit,
     onEditDone: () -> Unit,
-    onRemoveItem: (TodoItem) -> Unit
+    onRemoveItem: () -> Unit
 ) = TodoItemInput(
     text = item.task,
     onTextChange = { onEditItemChange(item.copy(task = it)) },
     icon = item.icon,
     onIconChange = { onEditItemChange(item.copy(icon = it))},
     submit = onEditDone,
-    iconsVisible = true
+    iconsVisible = true,
+    buttonSlot = {
+        Row {
+            val shrinkButtons = Modifier.widthIn(20.dp)
+            TextButton(onClick = onEditDone, modifier = shrinkButtons) {
+                Text(
+                    text = "💾",
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.width(30.dp)
+                )
+            }
+            TextButton(onClick = onRemoveItem, modifier = shrinkButtons) {
+                Text(
+                    text = "❌",
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.width(30.dp)
+                )
+            }
+        }
+    }
 )
 
 /**
@@ -203,7 +225,8 @@ fun TodoItemInput(
     icon: TodoIcon,
     onIconChange: (TodoIcon) -> Unit,
     submit: () -> Unit,
-    iconsVisible: Boolean
+    iconsVisible: Boolean,
+    buttonSlot: @Composable () -> Unit  // Slots
 ) {
     Column {
         Row(
@@ -221,12 +244,17 @@ fun TodoItemInput(
                 onImeAction = submit    // 키보드 자판 액션
             )
 
-            TodoEditButton(
-                onClick = submit,
-                text = "Add",
-                modifier = Modifier.align(Alignment.CenterVertically),
-                enabled = text.isNotBlank()
-            )
+            // 기존의 TodoEditButton 대신 슬롯으로 대체
+            Spacer(modifier = Modifier.width(8.dp))
+            // 그냥 슬롯을 사용해도 되지만, 예제에서는 정렬을 맞추기 위해 Box 사용
+            Box(modifier = Modifier.align(Alignment.CenterVertically)) { buttonSlot() }
+
+//            TodoEditButton(
+//                onClick = submit,
+//                text = "Add",
+//                modifier = Modifier.align(Alignment.CenterVertically),
+//                enabled = text.isNotBlank()
+//            )
 
         }
 
