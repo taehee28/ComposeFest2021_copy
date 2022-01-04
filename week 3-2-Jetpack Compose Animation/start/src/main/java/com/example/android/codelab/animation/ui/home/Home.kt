@@ -396,7 +396,7 @@ private fun TopicRow(topic: String, expanded: Boolean, onClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .animateContentSize()   // Column이 컨텐츠에 맞춰 사이즈를 변경시키는 주체 
+                .animateContentSize()   // Column이 컨텐츠에 맞춰 사이즈를 변경시키는 주체
         ) {
             Row {
                 Icon(
@@ -477,9 +477,34 @@ private fun HomeTabIndicator(
     tabPage: TabPage
 ) {
     // TODO 4: Animate these value changes.
-    val indicatorLeft = tabPositions[tabPage.ordinal].left
-    val indicatorRight = tabPositions[tabPage.ordinal].right
-    val color = if (tabPage == TabPage.Home) Purple700 else Green800
+    val transition = updateTransition(targetState = tabPage, label = "Tab indicator")    // 타겟 지정
+    // animate* 함수들은 State 타입으로 반환하기 때문에 by 쓰는게 편함
+    val indicatorLeft by transition.animateDp(
+        transitionSpec = {      // 움직이는 방향으로 스프링 효과
+            if (TabPage.Home isTransitioningTo TabPage.Work) {
+                spring(stiffness = Spring.StiffnessVeryLow)
+            } else {
+                spring(stiffness = Spring.StiffnessMedium)
+            }
+        },
+        label = "Indicator left"
+    ) { tabPositions[it.ordinal].left }
+    val indicatorRight by transition.animateDp(
+        transitionSpec = {      // 움직이는 방향으로 스프링 효과
+            if (TabPage.Home isTransitioningTo TabPage.Work) {
+                spring(stiffness = Spring.StiffnessMedium)
+            } else {
+                spring(stiffness = Spring.StiffnessVeryLow)
+            }
+        },
+        label = "Indicator right"
+    ) { tabPositions[it.ordinal].right }
+    val color by transition.animateColor(label = "Border color") { if (it == TabPage.Home) Purple700 else Green800 }
+
+//    val indicatorLeft = tabPositions[tabPage.ordinal].left
+//    val indicatorRight = tabPositions[tabPage.ordinal].right
+//    val color = if (tabPage == TabPage.Home) Purple700 else Green800
+
     Box(
         Modifier
             .fillMaxSize()
@@ -565,7 +590,19 @@ private fun WeatherRow(
 @Composable
 private fun LoadingRow() {
     // TODO 5: Animate this value between 0f and 1f, then back to 0f repeatedly.
-    val alpha = 1f
+    val infiniteTransition = rememberInfiniteTransition()
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+            durationMillis = 1000
+            0.7f at 500
+            },
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+//    val alpha = 1f
     Row(
         modifier = Modifier
             .heightIn(min = 64.dp)
