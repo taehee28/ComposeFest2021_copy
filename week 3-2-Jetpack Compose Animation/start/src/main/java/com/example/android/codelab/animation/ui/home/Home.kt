@@ -396,6 +396,7 @@ private fun TopicRow(topic: String, expanded: Boolean, onClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
+                .animateContentSize()   // Column이 컨텐츠에 맞춰 사이즈를 변경시키는 주체 
         ) {
             Row {
                 Icon(
