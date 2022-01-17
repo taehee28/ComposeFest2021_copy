@@ -22,13 +22,22 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.example.compose.rally.data.UserData
+import com.example.compose.rally.ui.accounts.AccountsBody
+import com.example.compose.rally.ui.bills.BillsBody
 import com.example.compose.rally.ui.components.RallyTabRow
+import com.example.compose.rally.ui.overview.OverviewBody
 import com.example.compose.rally.ui.theme.RallyTheme
 
 /**
@@ -48,23 +57,49 @@ class RallyActivity : ComponentActivity() {
 fun RallyApp() {
     RallyTheme {
         val allScreens = RallyScreen.values().toList()
-        var currentScreen by rememberSaveable { mutableStateOf(RallyScreen.Overview) }
+        // FIXME: This duplicate source of truth
+//        var currentScreen by rememberSaveable { mutableStateOf(RallyScreen.Overview) }
+        val navController = rememberNavController()
+        val backstackEntry = navController.currentBackStackEntryAsState()
+        // Navigation 사용에 맞게 현재화면 업데이트하는 방법 변경
+        val currentScreen = RallyScreen.fromRoute(backstackEntry.value?.destination?.route)
+
         Scaffold(
             topBar = {
                 RallyTabRow(
                     allScreens = allScreens,
-                    onTabSelected = { screen -> currentScreen = screen },
+                    onTabSelected = { screen -> navController.navigate(screen.name) },
                     currentScreen = currentScreen
                 )
             }
         ) { innerPadding ->
-            Box(Modifier.padding(innerPadding)) {
-                currentScreen.content(
-                    onScreenChange = { screen ->
-                        currentScreen = RallyScreen.valueOf(screen)
-                    }
-                )
+            NavHost(
+                navController = navController,
+                startDestination = RallyScreen.Overview.name,   // 시작점
+                modifier = Modifier.padding(innerPadding)
+            ) {
+                // composable 확장함수로 감싸진 하나 하나가 네비게이션 그래프에 목적지로 추가됨  
+                composable(RallyScreen.Overview.name) {
+                    OverviewBody(
+                        onClickSeeAllAccounts = { navController.navigate(RallyScreen.Accounts.name) },
+                        onClickSeeAllBills = { navController.navigate(RallyScreen.Bills.name) }
+                    )
+                }
+                composable(RallyScreen.Accounts.name) {
+                    AccountsBody(accounts = UserData.accounts)
+                }
+                composable(RallyScreen.Bills.name) {
+                    BillsBody(bills = UserData.bills)
+                }
             }
+
+//            Box(Modifier.padding(innerPadding)) {
+//                currentScreen.content(
+//                    onScreenChange = { screen ->
+//                        currentScreen = RallyScreen.valueOf(screen)
+//                    }
+//                )
+//            }
         }
     }
 }

@@ -31,26 +31,22 @@ import com.example.compose.rally.ui.overview.OverviewBody
  * Screen metadata for Rally.
  */
 enum class RallyScreen(
-    val icon: ImageVector,
-    val body: @Composable ((String) -> Unit) -> Unit
+    val icon: ImageVector
 ) {
     Overview(
         icon = Icons.Filled.PieChart,
-        body = { OverviewBody() }
     ),
     Accounts(
         icon = Icons.Filled.AttachMoney,
-        body = { AccountsBody(UserData.accounts) }
     ),
     Bills(
         icon = Icons.Filled.MoneyOff,
-        body = { BillsBody(UserData.bills) }
     );
 
-    @Composable
-    fun content(onScreenChange: (String) -> Unit) {
-        body(onScreenChange)
-    }
+//    @Composable
+//    fun content(onScreenChange: (String) -> Unit) {
+//        body(onScreenChange)
+//    }
 
     companion object {
         fun fromRoute(route: String?): RallyScreen =

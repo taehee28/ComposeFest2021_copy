@@ -16,7 +16,8 @@
       <change beforePath="$PROJECT_DIR$/.gradle/7.1.1/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.1.1/fileHashes/fileHashes.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/7.1.1/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.1.1/fileHashes/resourceHashesCache.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/start/src/main/java/com/example/android/codelab/animation/ui/home/Home.kt" beforeDir="false" afterPath="$PROJECT_DIR$/start/src/main/java/com/example/android/codelab/animation/ui/home/Home.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../week 3-3-Jetpack Compose Navigation/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/../week 3-3-Jetpack Compose Navigation/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../week 3-3-Jetpack Compose Navigation/app/src/main/java/com/example/compose/rally/RallyActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../week 3-3-Jetpack Compose Navigation/app/src/main/java/com/example/compose/rally/RallyActivity.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
