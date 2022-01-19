@@ -36,6 +36,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.example.compose.rally.data.UserData
 import com.example.compose.rally.ui.accounts.AccountsBody
 import com.example.compose.rally.ui.accounts.SingleAccountBody
@@ -102,7 +103,11 @@ fun RallyApp() {
                         navArgument("name") {
                             type = NavType.StringType
                         }
-                    )
+                    ),
+                    // 외부에서 해당 앱의 특정 화면을 열 수 있도록 딥링크 추가
+                    deepLinks = listOf(navDeepLink {
+                        uriPattern = "rally://$accountsName/{name}"
+                    })
                 ) { entry ->
                     // composable의 arguments 항목에 넘긴 인자들을 여기서 파라미터인 entry로 꺼내쓸 수 있음
                     // 전달된 argument로 destination에 필요한 요소를 찾음
