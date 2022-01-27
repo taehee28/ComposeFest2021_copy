@@ -113,7 +113,7 @@ class PlantDetailFragment : Fragment() {
         // view 내부에 들어간 compose 
         binding.composeView.setContent {
             MaterialTheme {
-                PlantDetailDescription()
+                PlantDetailDescription(plantDetailViewModel = plantDetailViewModel)
             }
         }
 
