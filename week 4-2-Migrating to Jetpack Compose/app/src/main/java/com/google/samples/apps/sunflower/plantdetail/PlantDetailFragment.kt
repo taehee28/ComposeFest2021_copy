@@ -22,6 +22,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.material.MaterialTheme
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ShareCompat
 import androidx.core.widget.NestedScrollView
@@ -111,11 +112,23 @@ class PlantDetailFragment : Fragment() {
         setHasOptionsMenu(true)
 
         // view 내부에 들어간 compose 
-        binding.composeView.setContent {
-            MaterialTheme {
-                PlantDetailDescription(plantDetailViewModel = plantDetailViewModel)
+        binding.composeView.apply {
+            // 컴포저블이 더 복잡한 수명주기를 가지는 요소들 혹은 요소들이 가지는 값들과 상호작용 해야할 때,
+            // 컴포저블이 요소의 수명주기에 맞춰져야 할 필요가 있음.
+            // 컴포저블은 기본적으로 윈도우에서 분리되면 컴포지션이 삭제됨
+            // -> 윈도우에서 분리되더라도 상태를 유지하는 수명주기가 있는 것들과 상호작용을 해야 한다면, 얘네한테 맞춰야 함.
+
+            // 뷰의 lifecycle owner가 제거되었을 때 컴포지션을 삭제
+            // 화면의 전환이 일어나더라도 상태를 잃지 않도록
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
+            setContent {
+                MaterialTheme {
+                    PlantDetailDescription(plantDetailViewModel = plantDetailViewModel)
+                }
             }
         }
+
 
         return binding.root
     }
